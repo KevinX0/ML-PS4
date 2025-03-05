@@ -117,7 +117,7 @@ lm_pcr_opt = LinearRegression()
 lm_pcr_opt.fit(X_train_pca_opt, y_train)
 y_pcr_pred = lm_pcr_opt.predict(X_test_pca_opt)
 
-# Compute MSE
+# compute MSE
 test_mse_pcr = mean_squared_error(y_test, y_pcr_pred)
 
 # determine the elbow point using the "elbow method"
@@ -134,13 +134,14 @@ mse_list_pls = []
 
 for m in components_range:
     pls = PLSRegression(n_components=m)
-    mse = -np.mean(cross_val_score(pls, X_train_scaled, y_train, cv=kf, scoring='neg_mean_squared_error'))
+    mse = -np.mean(cross_val_score(pls, X_train_scaled, y_train,
+                   cv=kf, scoring='neg_mean_squared_error'))
     mse_list_pls.append(mse)
 
 # minimizing cross-validated error
 optimal_m_pls = components_range[np.argmin(mse_list_pls)]
 
-# fit PLS model 
+# fit PLS model
 pls_opt = PLSRegression(n_components=optimal_m_pls)
 pls_opt.fit(X_train_scaled, y_train)
 y_pls_pred = pls_opt.predict(X_test_scaled)
@@ -148,9 +149,9 @@ y_pls_pred = pls_opt.predict(X_test_scaled)
 # compute MSE
 test_mse_pls = mean_squared_error(y_test, y_pls_pred)
 
-# determine the elbow point 
-second_derivative_pls = np.diff(mse_list_pls, 2) 
-elbow_m_pls = components_range[np.argmin(second_derivative_pls) + 1] 
+# determine the elbow point
+second_derivative_pls = np.diff(mse_list_pls, 2)
+elbow_m_pls = components_range[np.argmin(second_derivative_pls) + 1]
 
 optimal_m_pls, test_mse_pls, elbow_m_pls
 ```
@@ -164,7 +165,7 @@ optimal_m_pls, test_mse_pls, elbow_m_pls
 # reate a decision tree graph
 G = nx.DiGraph()
 
-# adding nodes 
+# adding nodes
 G.add_node("Root")
 G.add_node("X2 < 1")
 G.add_node("X1 < 1")
@@ -178,11 +179,12 @@ G.add_node("5")
 
 # adding edges
 G.add_edges_from([
-    ("Root", "X2 < 1"), ("X2 < 1", "X1 < 1"), ("X1 < 1", "X1 < 0"), ("X1 < 0", "3"), ("X1 < 0", "X2 < 0"),
+    ("Root", "X2 < 1"), ("X2 < 1", "X1 < 1"), ("X1 < 1",
+                                               "X1 < 0"), ("X1 < 0", "3"), ("X1 < 0", "X2 < 0"),
     ("X2 < 0", "10"), ("X2 < 0", "0"), ("X1 < 1", "15"), ("X2 < 1", "5")
 ])
 
-# define positions 
+# define positions
 pos = {
     "Root": (2, 4),
     "X2 < 1": (2, 3),
@@ -198,7 +200,8 @@ pos = {
 
 # display the graph
 plt.figure(figsize=(8, 6))
-nx.draw(G, pos, with_labels=True, node_size=3000, node_color="lightblue", font_size=10, font_weight="bold", edge_color="gray")
+nx.draw(G, pos, with_labels=True, node_size=3000, node_color="lightblue",
+        font_size=10, font_weight="bold", edge_color="gray")
 plt.title("Decision Tree")
 plt.show()
 ```
@@ -213,11 +216,11 @@ ax.set_ylim(0, 3)
 ax.set_xlabel("X1")
 ax.set_ylabel("X2")
 
-# draw partition lines 
-ax.axhline(y=1, color="red", linestyle="dashed") 
-ax.axhline(y=2, color="red", linestyle="dashed")  
-ax.vlines(x=1, ymin=0, ymax=1, color="blue", linestyle="dashed") 
-ax.vlines(x=0, ymin=1, ymax=2, color="blue", linestyle="dashed")  
+# draw partition lines
+ax.axhline(y=1, color="red", linestyle="dashed")
+ax.axhline(y=2, color="red", linestyle="dashed")
+ax.vlines(x=1, ymin=0, ymax=1, color="blue", linestyle="dashed")
+ax.vlines(x=0, ymin=1, ymax=2, color="blue", linestyle="dashed")
 
 # add region labels (mean values from the tree)
 ax.text(0, 0.5, "-1.80", fontsize=12, ha='center', va='center')
@@ -240,11 +243,12 @@ oj_df = pd.read_csv(oj_file_path)
 ## Question 3a
 ```{python}
 # define variable
-X = oj_df.drop(columns=['Purchase'])  
+X = oj_df.drop(columns=['Purchase'])
 y = oj_df['Purchase']
 
 # split the data into training and testing sets
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=3)
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.3, random_state=3)
 ```
 
 ## Question 3b
@@ -253,11 +257,12 @@ X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_
 y_train_encoded = LabelEncoder().fit_transform(y_train)
 y_test_encoded = LabelEncoder().fit_transform(y_test)
 
-# convert categorical predictors to numeric values 
+# convert categorical predictors to numeric values
 X_train_encoded = pd.get_dummies(X_train, drop_first=True)
 X_test_encoded = pd.get_dummies(X_test, drop_first=True)
 
-X_train_encoded, X_test_encoded = X_train_encoded.align(X_test_encoded, join='left', axis=1, fill_value=0)
+X_train_encoded, X_test_encoded = X_train_encoded.align(
+    X_test_encoded, join='left', axis=1, fill_value=0)
 
 # fit the full decision tree model
 tree_clf = DecisionTreeClassifier(random_state=2)
@@ -312,26 +317,29 @@ conf_matrix, test_error_rate
 ```{python}
 # perform CCP path to get alpha values
 path = tree_clf.cost_complexity_pruning_path(X_train_encoded, y_train_encoded)
-ccp_alphas = path.ccp_alphas[:-1] 
+ccp_alphas = path.ccp_alphas[:-1]
 
-# Perform 5-fold cross-validation 
+# Perform 5-fold cross-validation
 cv_scores = []
 
 for alpha in ccp_alphas:
     pruned_tree = DecisionTreeClassifier(ccp_alpha=alpha, random_state=2)
-    scores = cross_val_score(pruned_tree, X_train_encoded, y_train_encoded, cv=5, scoring='accuracy')
-    cv_scores.append(1 - np.mean(scores)) 
+    scores = cross_val_score(pruned_tree, X_train_encoded,
+                             y_train_encoded, cv=5, scoring='accuracy')
+    cv_scores.append(1 - np.mean(scores))
 
 # find the optimal alpha
 optimal_alpha = ccp_alphas[np.argmin(cv_scores)]
 
-# display the plot 
+# display the plot
 plt.figure(figsize=(8, 5))
-plt.plot(ccp_alphas, cv_scores, marker="o", linestyle="dashed", label="Cross-Validated Error Rate")
+plt.plot(ccp_alphas, cv_scores, marker="o", linestyle="dashed",
+         label="Cross-Validated Error Rate")
 plt.xlabel("Alpha (ccp_alpha)")
 plt.ylabel("Classification Error Rate")
 plt.title("Cost Complexity Pruning: Alpha vs. Error Rate")
-plt.axvline(optimal_alpha, color="red", linestyle="dashed", label=f"Optimal Alpha = {optimal_alpha:.4f}")
+plt.axvline(optimal_alpha, color="red", linestyle="dashed",
+            label=f"Optimal Alpha = {optimal_alpha:.4f}")
 plt.legend()
 plt.show()
 
@@ -353,13 +361,15 @@ for alpha in ccp_alphas:
 # find the optimal tree size corresponding to the lowest classification error
 optimal_tree_size = tree_sizes[np.argmin(cv_scores)]
 
-# display the plot 
+# display the plot
 plt.figure(figsize=(8, 5))
-plt.plot(tree_sizes, cv_scores, marker="o", linestyle="dashed", label="Cross-Validated Error Rate")
+plt.plot(tree_sizes, cv_scores, marker="o", linestyle="dashed",
+         label="Cross-Validated Error Rate")
 plt.xlabel("Tree Size (Number of Nodes)")
 plt.ylabel("Classification Error Rate")
 plt.title("Tree Size vs. Classification Error Rate")
-plt.axvline(optimal_tree_size, color="red", linestyle="dashed", label=f"Optimal Tree Size = {optimal_tree_size}")
+plt.axvline(optimal_tree_size, color="red", linestyle="dashed",
+            label=f"Optimal Tree Size = {optimal_tree_size}")
 plt.legend()
 plt.show()
 
@@ -372,12 +382,14 @@ optimal_tree_size
 ## Question 3g
 ```{python}
 # fit the pruned decision tree using the optimal alpha
-optimal_pruned_tree = DecisionTreeClassifier(ccp_alpha=optimal_alpha, random_state=2)
+optimal_pruned_tree = DecisionTreeClassifier(
+    ccp_alpha=optimal_alpha, random_state=2)
 optimal_pruned_tree.fit(X_train_encoded, y_train_encoded)
 
 # display the pruned tree
 plt.figure(figsize=(12, 6))
-plot_tree(optimal_pruned_tree, feature_names=X_train_encoded.columns, class_names=['CH', 'MM'], filled=True, fontsize=10)
+plot_tree(optimal_pruned_tree, feature_names=X_train_encoded.columns,
+          class_names=['CH', 'MM'], filled=True, fontsize=10)
 plt.title(f"Optimal Pruned Decision Tree (ccp_alpha = {optimal_alpha:.4f})")
 plt.show()
 ```
@@ -385,11 +397,11 @@ plt.show()
 ## Question 3h
 ```{python}
 y_train_pred_pruned = optimal_pruned_tree.predict(X_train_encoded)
-train_error_rate_pruned = 1 - accuracy_score(y_train_encoded, y_train_pred_pruned)
+train_error_rate_pruned = 1 - \
+    accuracy_score(y_train_encoded, y_train_pred_pruned)
 
 # compare training error rates
 train_error_rate, train_error_rate_pruned
-
 ```
 
 - The training error rate for the unpruned tree is 0.67%; the training error rate for the pruned tree is  15.62%.
@@ -399,19 +411,11 @@ train_error_rate, train_error_rate_pruned
 ```{python}
 y_test_pred_pruned = optimal_pruned_tree.predict(X_test_encoded)
 test_error_rate_pruned = 1 - accuracy_score(y_test_encoded, y_test_pred_pruned)
+
 # compare test error rates
 test_error_rate, test_error_rate_pruned
-
 ```
 
 - The test error rate for the unpruned tree is 24.3%; the test error rate for the pruned tree is 19.63%.
-- Pruning removes overly specific splits that capture noise in the training data, preventing overfitting. As a result, the pruned tree generalizes unseen data better, reducing test errors. The unpruned tree overfits the training set, leading to a higher test error due to poor generalization. 
-
-
-
-
-
-
-
-
+-Pruning removes overly specific splits that capture noise in the training data, preventing overfitting. As a result, the pruned tree generalizes unseen data better, reducing test errors. The unpruned tree overfits the training set, leading to a higher test error due to poor generalization. 
 
